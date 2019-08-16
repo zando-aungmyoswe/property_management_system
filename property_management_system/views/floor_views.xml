@@ -1,0 +1,64 @@
+<odoo>
+  <data>
+    <record model="ir.ui.view" id="view_floor_form">
+      <field name="name">Floor Form</field>
+      <field name="model">pms.floor</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <group>
+              <field name="name"/>
+              <field name="code"/>
+              </group>
+              <group>
+              <field name="floor_code_ref"/>
+              <field name="active"/>
+              </group>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+    <record model="ir.ui.view" id="view_floor_tree">
+      <field name="name">Floor list</field>
+      <field name="model">pms.floor</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="code"/>
+          <field name="floor_code_ref"/>
+          <field name="name"/>
+          <field name="active"/>
+        </tree>
+      </field>
+    </record>
+     <record model="ir.ui.view" id="view_floor_filter">
+      <field name="name">Floor list</field>
+      <field name="model">pms.floor</field>
+      <field name="arch" type="xml">
+        <search>
+          <field name="code"/>
+          <field name="floor_code_ref"/>
+          <field name="name"/>
+          <field name="active"/>
+        </search>
+      </field>
+    </record>
+     <record id="action_floor_all" model="ir.actions.act_window">
+       <field name="name">Floor</field>
+       <field name="res_model">pms.floor</field>
+       <field name="view_type">form</field>
+       <field name="view_mode">tree,form</field>
+       <field name="view_id" ref="view_floor_tree"/> 
+    </record> 
+    <!-- <menuitem  id="floor_menu_root_sub" 
+      name="Floor" 
+      parent="pms_properties_menu_root" 
+      sequence="2"/> -->
+    <menuitem  id="floor_menu_root" 
+      name="Floor" 
+      parent="pms_properties_menu_root"
+      action="action_floor_all"
+      sequence="2"/>
+  </data>
+</odoo>

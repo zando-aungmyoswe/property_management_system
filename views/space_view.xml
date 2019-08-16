@@ -1,0 +1,194 @@
+<odoo>
+  <data>
+    <record model="ir.ui.view" id="view_space_form">
+      <field name="name">Space Unit Form</field>
+      <field name="model">ml.space</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <group>
+                 <div class="oe_title">
+                    <h1>
+                        <field name="name" readonly="1"/>
+                    </h1>
+                  </div>
+              </group>
+              <group>
+              </group>
+            </group>
+            <group>
+              <group>
+                <field name="mall"/>
+                <field name="unit_no"/>
+                <field name="date"/>
+                <field name="uom"/>
+              </group>
+              <group>
+                <field name="floor"/>
+                <field name="area"/>
+                <field name="enddate"/>
+                <field name="status"/>
+              </group>
+            </group>
+            <notebook>
+              <page name="Facilities" string="Facilities">
+                <field name ="utility_id" widget="one2many">
+                  <tree>
+                  <!-- <field name="name"/>
+                  <field name="unit_id"/> -->
+                  <field name="utility_type"/>
+                  <!-- <field name="meter_no"/> -->
+                  <field name="interface_type"/>
+                  <field name="remark"/>
+                </tree>
+                <form>
+                  <group>
+                    <group>
+                     <!--  <field name="utility_type" options="{'no_quick_create':True,'no_create_edit':True}"/> -->
+                      <field name="utility_type" />
+                      <field name="utility_code" invisible="1"/>
+                      <field name="meter_no"/>
+                      <field name="interface_type" widget="radio"/>
+                      <field name="remark"/>
+                    </group>
+                    <group>
+                       <div style="width:100%;">
+                       <group colspan="2">
+                       <field name="start_date"/>
+                       </group>
+                       </div>
+                      <group colspan="2" attrs="{'invisible':[('utility_code','!=','TCA')]}">
+                        <div style="width:100%;">
+                          <div class="check_box_container">
+                            <div attrs="{'invisible':[('utility_code','!=','TCA')]}">
+                              <field name="utt_idd" style="display:inline-block;"/>
+                              <div style="display:inline-block;">
+                                <label for="utt_idd" string="IDD" style="display:inline-block;"/>
+                              </div>
+                            </div>
+                            <div attrs="{'invisible':[('utility_code','!=','TCA')]}">
+                              <field name="utt_local" style="display:inline-block;"/>
+                             <div style="display:inline-block;">
+                                <label for="utt_local" string="LOCAL" style="display:inline-block;"/>
+                             </div>
+                            </div>
+                            <div attrs="{'invisible':[('utility_code','!=','TCA')]}">
+                              <field name="utt_mobile" style="display:inline-block;"/>
+                              <div style="display:inline-block;">
+                                <label for="utt_mobile" string="MOBILE" style="display:inline-block;"/>
+                              </div>
+                            </div>
+                            <div attrs="{'invisible':[('utility_code','!=','TCA')]}">
+                              <field name="utt_std" style="display:inline-block;" />
+                              <div style="display:inline-block;">
+                                <label for="utt_std" string="STD" style="display:inline-block;"/>
+                              </div>
+                            </div>
+                             <div attrs="{'invisible':[('utility_code','!=','PM')]}">
+                              <field name="utt_gen" style="display:inline-block;"/>
+                              <div style="display:inline-block;">
+                                <label for="utt_gen" string="GEN" style="display:inline-block;"/>
+                              </div>
+                            </div>
+                             <div attrs="{'invisible':[('utility_code','!=','PM')]}">
+                              <field name="utt_sub" style="display:inline-block;"/>
+                              <div style="display:inline-block;">
+                                <label for="utt_sub" string="SUB" style="display:inline-block;"/>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </group>
+                      <group attrs="{'invisible':[('utility_code','!=','PM')]}">
+                        <div style="width:100%;">
+                          <div class="check_box_container">                            
+                            <div >
+                              <field name="utt_gen" style="display:inline-block;"/>
+                              <div style="display:inline-block;">
+                                <label for="utt_gen" string="GEN" style="display:inline-block;"/>
+                              </div>
+                            </div>
+                             <div >
+                              <field name="utt_sub" style="display:inline-block;"/>
+                              <div style="display:inline-block;">
+                                <label for="utt_sub" string="SUB" style="display:inline-block;"/>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </group>
+                    </group>
+                  </group>
+                  <notebook>
+                    <page>
+                      <field name="meter_type_id" style="width:1150px;display:inline-block;">
+                        <tree>
+                          <field name="name" width="80px"/>
+                          <field name="display_type"/>
+                          <field name="charge_type"/>
+                          <field name="i_lmr_date"/>
+                          <field name="s_lmr_value"/>
+                          <field name="uom_id"/>
+                          <field name="digit"/>
+                          <field name="status"/>
+                          <field name="end_date"/>
+                          <field name="e_lmr_value"/>
+                        </tree>
+                      </field>
+                  </page>
+                </notebook>
+                </form>
+              </field> 
+            </page>
+           </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+    <record model="ir.ui.view" id="view_space_tree">
+      <field name="name">Space Unit list</field>
+      <field name="model">ml.space</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="mall"/>
+          <field name="floor"/>
+          <field name="unit_no"/>
+          <!-- <field name="meter_no"/> -->
+          <field name="area"/>
+          <field name="date"/>
+          <field name="enddate"/>
+          <field name="status"/>
+        </tree>
+      </field>
+    </record>
+     <record model="ir.ui.view" id="view_space_filter">
+      <field name="name">Space Unit Filter</field>
+      <field name="model">ml.space</field>
+      <field name="arch" type="xml">
+        <search>
+          <field name="mall"/>
+          <field name="floor"/>
+          <field name="status"/>
+        </search>
+      </field>
+    </record>
+     <record id="action_space_all" model="ir.actions.act_window">
+       <field name="name">Space Unit</field>
+       <field name="res_model">ml.space</field>
+       <field name="view_type">form</field>
+       <field name="view_mode">tree,form</field>
+       <field name="context">{'search_default_status':True}</field>
+       <field name="view_id" ref="view_space_tree"/> 
+    </record>
+    <menuitem  id="space_menu_root_sub" 
+      name="Space Unit" 
+      parent="mall_menu_root" 
+      sequence="3"/>
+    <menuitem  id="space_menu_root" 
+      name="Space Unit" 
+      parent="space_menu_root_sub"
+      action="action_space_all"
+      sequence="1"/>
+  </data>
+</odoo>

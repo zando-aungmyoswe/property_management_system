@@ -2,7 +2,7 @@
   <data>
     <menuitem id="pms_properties_menu_root"
             name="Property"
-            web_icon="properties_management_system,static/description/icon.png"
+            web_icon="property_management_system,static/description/icon.png"
             sequence="200"/>
     <record model="ir.ui.view" id="view_pms_properties_form">
       <field name="name">Properites Form</field>

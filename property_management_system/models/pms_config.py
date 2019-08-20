@@ -1,15 +1,4 @@
-from odoo import fields, models, api
-import pytz
-
-_tzs = [
-    (tz, tz)
-    for tz in sorted(pytz.all_timezones,
-                     key=lambda tz: tz if not tz.startswith('Etc/') else '_')
-]
-
-
-def _tz_get(self):
-    return _tzs
+from odoo import fields, models, api, _
 
 
 class PmsFormat(models.Model):
@@ -20,6 +9,14 @@ class PmsFormat(models.Model):
     active = fields.Boolean(default=True)
     format_line_id = fields.One2many("pms.format.detail", "format_id",
                                      "Format Line")
+
+    @api.multi
+    def name_get(self):
+        result = []
+        for record in self:
+            code = record.sample
+            result.append((record.id, code))
+        return result
 
     @api.multi
     def toggle_active(self):
@@ -59,46 +56,118 @@ class PmsFormatDetail(models.Model):
                 self.value = str(self.datetime_value)
 
 
-class PmsRule(models.Model):
-    _name = "pms.rule"
+class Company(models.Model):
+    _inherit = "res.company"
 
-    name = fields.Char("Name", default="Rule", readonly=True)
-    currency_id = fields.Many2one('res.currency', "Currency")
     property_code_len = fields.Integer("Property Code Length")
     floor_code_len = fields.Integer('Floor Code Length')
-    space_unit_code = fields.Many2one('pms.format', 'Space Unit Format')
-    spu_format = fields.Char('Format',
-                             related="space_unit_code.sample",
-                             store=True)
+    space_unit_code_len = fields.Integer('Space Unit Code Length')
+    space_unit_code_format = fields.Many2one('pms.format', 'Space Unit Format')
     pos_id_format = fields.Many2one('pms.format', 'POS ID Format')
-    pos_format = fields.Char('Format',
-                             related="pos_id_format.sample",
-                             store=True)
-    timezone = fields.Selection(
-        _tz_get,
-        string='Timezone',
-        default=lambda self: self._context.get('tz'),
-        help=
-        "The partner's timezone, used to output proper date and time values "
-        "inside printed reports. It is important to set a value for this field. "
-        "You should use the same timezone that is otherwise used to pick and "
-        "render date and time values: your computer's timezone.")
+
+
+class PMSRule(models.TransientModel):
+    _name = 'pms.rule'
+
+    @api.model
+    def _get_default_company(self):
+        if not self.company_id:
+            return self.env.user.company_id
+
+    @api.model
+    def _get_default_property_code_len(self):
+        if self.env.user.company_id:
+            rule_id = self.env['pms.rule'].search([
+                ('company_id', '=', self.env.user.company_id.id)
+            ])
+            if rule_id:
+                return rule_id.property_code_len
+
+    @api.model
+    def _get_default_floor_code_len(self):
+        if self.env.user.company_id:
+            rule_id = self.env['pms.rule'].search([
+                ('company_id', '=', self.env.user.company_id.id)
+            ])
+            if rule_id:
+                return rule_id.floor_code_len
+
+    @api.model
+    def _get_default_space_unit_code_len(self):
+        if self.env.user.company_id:
+            rule_id = self.env['pms.rule'].search([
+                ('company_id', '=', self.env.user.company_id.id)
+            ])
+            if rule_id:
+                return rule_id.space_unit_code_len
+
+    @api.model
+    def _get_default_space_unit_code_format(self):
+        if self.env.user.company_id:
+            rule_id = self.env['pms.rule'].search([
+                ('company_id', '=', self.env.user.company_id.id)
+            ])
+            if rule_id:
+                return rule_id.space_unit_code_format
+
+    @api.model
+    def _get_default_pos_id_format(self):
+        if self.env.user.company_id:
+            rule_id = self.env['pms.rule'].search([
+                ('company_id', '=', self.env.user.company_id.id)
+            ])
+            if rule_id:
+                return rule_id.pos_id_format
+
+    name = fields.Char("Setting")
+    company_id = fields.Many2one("res.company",
+                                 "Company",
+                                 default=_get_default_company)
+    property_code_len = fields.Integer("Property Code Length",
+                                       default=_get_default_property_code_len)
+    floor_code_len = fields.Integer('Floor Code Length',
+                                    default=_get_default_floor_code_len)
+    space_unit_code_len = fields.Integer(
+        'Space Unit Code Length', default=_get_default_space_unit_code_len)
+    space_unit_code_format = fields.Many2one(
+        'pms.format',
+        'Space Unit Format',
+        default=_get_default_space_unit_code_format)
+    pos_id_format = fields.Many2one('pms.format',
+                                    'POS ID Format',
+                                    default=_get_default_pos_id_format)
+
+
+class PMSRuleSetting(models.TransientModel):
+    _inherit = 'res.config.settings'
+    _name = 'pms.rule.setting'
+    _inherit = 'pms.rule'
+
+    @api.multi
+    def copy(self, values):
+        raise UserError(_("Cannot duplicate configuration!"), "")
 
     @api.multi
     def execute(self):
+        vals = {}
         self.ensure_one()
-        if not self.env.user._is_admin() and not self.env.user.has_group(
-                'base.group_system'):
-            raise AccessError(_("Only administrators can change the settings"))
-
-        self = self.with_context(active_test=False)
-
-        config = self.env['res.config'].next() or {}
-        if config.get('type') not in ('ir.actions.act_window_close', ):
-            return config
-
-        # force client-side reload (update user menu and current view)
+        rule_id = self.env['pms.rule'].search([])
+        vals = {
+            'name': _("Setting"),
+            'company_id': self.company_id.id,
+            'property_code_len': self.property_code_len,
+            'floor_code_len': self.floor_code_len,
+            'space_unit_code_len': self.space_unit_code_len,
+            'space_unit_code_format': self.space_unit_code_format.id,
+            'pos_id_format': self.pos_id_format.id,
+        }
+        if rule_id:
+            rule_id.write(vals)
+        else:
+            self.env['pms.rule'].create(vals)
         return {
             'type': 'ir.actions.client',
+            'name': _('Setting'),
+            'res_model': 'pms.rule',
             'tag': 'reload',
         }

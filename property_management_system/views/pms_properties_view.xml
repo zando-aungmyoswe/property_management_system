@@ -17,8 +17,8 @@
                 <field name="code"/>
                 <field name="gross_floor_area" placeholder="Gross Floor Area"/>
                 <field name="auto_generate_posid"/>
-                <field name="next_pos_id"/>
-                <field name="pos_id_format"/>
+                <!-- <field name="next_pos_id"/>
+                <field name="pos_id_format"/> -->
                 <field name="property_type"/>
                 <field name="uom"/>
                 <field name="net_lett_able_area" placeholder="Net-Lett-able Area"/>
@@ -102,68 +102,6 @@
                   <group>
                   </group>
                 </group>
-                <h5>Management Contact &amp; Address</h5> 
-                <field name="property_contract_address_id" mode="kanban">
-                    <kanban>
-                      <field name="id"/>
-                      <field name="color"/>
-                      <field name="name"/>
-                      <field name="title"/>
-                      <field name="type"/>
-                      <field name="email"/>
-                      <field name="parent_id"/>
-                      <field name="is_company"/>
-                      <field name="function"/>
-                      <field name="phone"/>
-                      <field name="street"/>
-                      <field name="street2"/>
-                      <field name="zip"/>
-                      <field name="city"/>
-                      <field name="country_id"/>
-                      <field name="mobile"/>
-                      <field name="state_id"/>
-                      <field name="image_small"/>
-                      <field name="lang"/>
-                      <!-- fields in form x2many view to diminish requests -->
-                      <field name="comment"/>
-                      <field name="customer"/>
-                      <field name="display_name"/>
-                      <field name="supplier"/>
-                      <templates>
-                          <t t-name="kanban-box">
-                              <t t-set="color" t-value="kanban_color(record.color.raw_value)"/>
-                              <div t-att-class="color + (record.title.raw_value == 1 ? ' oe_kanban_color_alert' : '') + ' oe_kanban_global_click'">
-                                  <div class="o_kanban_image">
-                                      <img alt="" t-if="record.image_small.raw_value" t-att-src="kanban_image('res.partner', 'image_small', record.id.raw_value)"/>
-                                      <t t-if="!record.image_small.raw_value">
-                                          <img alt="Delivery" t-if="record.type.raw_value === 'delivery'" t-att-src='_s + "/base/static/img/truck.png"'/>
-                                          <img alt="Invoice" t-if="record.type.raw_value === 'invoice'" t-att-src='_s + "/base/static/img/money.png"'/>
-                                          <t t-if="record.type.raw_value !== 'invoice' &amp;&amp; record.type.raw_value !== 'delivery'">
-                                              <img alt="Logo" t-if="record.is_company.raw_value === true" t-att-src='_s + "/base/static/img/company_image.png"'/>
-                                              <img alt="Avatar" t-if="record.is_company.raw_value === false" t-att-src='_s + "/base/static/img/avatar.png"'/>
-                                          </t>
-                                      </t>
-                                  </div>
-                                  <div class="oe_kanban_details">
-                                      <field name="name"/>
-                                      <div t-if="record.function.raw_value"><field name="function"/></div>
-                                      <div t-if="record.email.raw_value"><field name="email" widget="email"/></div>
-                                      <div t-if="record.type.raw_value != 'contact'">
-                                          <div>
-                                              <field name="zip"/>
-                                              <field name="city"/>
-                                          </div>
-                                          <field t-if="record.state_id.raw_value" name="state_id"/>
-                                          <field name="country_id"/>
-                                      </div>
-                                      <div t-if="record.phone.raw_value">Phone: <field name="phone"/></div>
-                                      <div t-if="record.mobile.raw_value">Mobile: <field name="mobile"/></div>
-                                  </div>
-                              </div>
-                          </t>
-                      </templates>
-                    </kanban>
-                  </field>
               </page>
               <page name="Bank" string="Bank Information">
               <group>
@@ -171,14 +109,28 @@
                 <group></group>
               </group> 
               </page>
-              <!-- <page name="Rule" string="Rule">
-               <group string="">
-               </group>
+              <page name="Terms" string="Terms">
                <group>
+                <group>
+                  <field name="currency_id"/>
+                  <field name="timezone"/>
+                </group>
+                <group>
+                </group>
                </group>
-               <group>
-               </group>
-              </page> -->
+               <label for='leaseterms_line_id' style="background-color:#e6e6e6;width:100%;padding:3px;" string="Lease Terms"></label>
+               <separator/>
+               <field name="leaseterms_line_id" widget='many2many' style="width:95%;padding:5px;">
+                  <tree editable="bottom">
+                      <field name="name"/>
+                      <field name="lease_term_type"/> 
+                      <field name="min_time_period"/> 
+                      <field name="max_time_period"/>  
+                      <field name="max_time_period"/> 
+                      <field name="active"/>  
+                  </tree>
+              </field>
+              </page>
             </notebook>
           </sheet>
         </form>
@@ -235,11 +187,11 @@
       parent="pms_menu_config"
       action="action_pms_properties_all"
       sequence="1"/>
-    <menuitem id="management_teams_menu" 
+    <!-- <menuitem id="management_teams_menu" 
       name="Management Teams" 
       parent="pms_menu_config"
       action="sales_team.sales_team_config_action"
-      sequence="2"/>
+      sequence="2"/> -->
     <menuitem id="uom_menu" 
       name="Units of Measure" 
       parent="pms_menu_config"

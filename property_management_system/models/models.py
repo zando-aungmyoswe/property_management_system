@@ -1,5 +1,17 @@
 #-*- coding: utf-8 -*-
-from odoo import models, fields, api
+from odoo import models, fields, api, tools
+import base64
+import pytz
+
+_tzs = [
+    (tz, tz)
+    for tz in sorted(pytz.all_timezones,
+                     key=lambda tz: tz if not tz.startswith('Etc/') else '_')
+]
+
+
+def _tz_get(self):
+    return _tzs
 
 
 class PMSPropertyType(models.Model):
@@ -41,19 +53,29 @@ class PMSProperties(models.Model):
     project_start_date = fields.Date("Project Start Date")
     target_open_date = fields.Date("Target Opening Date")
     actual_opening_date = fields.Date("Actual Openiing Date")
-    bank_info = fields.Many2one('res.bank', "Bank")
+    bank_info = fields.Many2one('res.bank', "Bank Information")
     # bank_account = fields.Char("Bank Account")
     property_contract_address_id = fields.Many2many('res.partner',
                                                     'pms_contract_address',
                                                     string='Contacts',
                                                     domain=[('active', '=',
                                                              True)])
-    management_company = fields.Char("Company")
-    management_contract_address_id = fields.Many2many(
-        'res.partner',
-        string='Management Company',
-        domain=[('active', '=', True)])
-
+    management_company = fields.Many2one("res.company", "Company")
+    leaseterms_line_id = fields.Many2many("pms.leaseterms",
+                                          "pms_properties_leaseterms_rel",
+                                          "properties_id",
+                                          "leaseterm_id",
+                                          string="Add LeaseTerms")
+    currency_id = fields.Many2one("res.currency", "Currency")
+    timezone = fields.Selection(
+        _tz_get,
+        string='Timezone',
+        default=lambda self: self._context.get('tz'),
+        help=
+        "The partner's timezone, used to output proper date and time values "
+        "inside printed reports. It is important to set a value for this field. "
+        "You should use the same timezone that is otherwise used to pick and "
+        "render date and time values: your computer's timezone.")
     image = fields.Binary(
         "Image",
         attachment=True,
@@ -77,10 +99,15 @@ class PMSProperties(models.Model):
 
     @api.model
     def create(self, values):
-        # if values.get('name', 'New') == 'New':
-        #     values[
-        #         'name'] = 'Mall(' + self.mall.code + ')/Unit(' + self.unit_no + ')'
+        if values['image']:
+            print("Image", values['image'])
+            tools.image_resize_images(values, sizes={'image': (1024, None)})
         return super(PMSProperties, self).create(values)
+
+    @api.multi
+    def write(self, vals):
+        tools.image_resize_images(vals, sizes={'image': (1024, None)})
+        return super(PMSProperties, self).write(vals)
 
 
 # class Users(models.Model):
@@ -92,7 +119,6 @@ class PMSProperties(models.Model):
 #             Users, self.with_context(default_customer=False)).create(vals_list)
 #         users.partner_id.user_id = users
 #         return users
-
 
 # class CrmTeam(models.Model):
 #     _inherit = "crm.team"
@@ -130,6 +156,17 @@ class PMSFloor(models.Model):
             code = record.code
             result.append((record.id, code))
         return result
+
+
+class PMSLeaseTerms(models.Model):
+    _name = 'pms.leaseterms'
+
+    name = fields.Char("Description", required=True)
+    lease_term_type = fields.Selection([('month', "Month"), ('year', "Year")],
+                                       string="Type")
+    min_time_period = fields.Integer("Min Time Period")
+    max_time_period = fields.Integer("Max Time Period")
+    active = fields.Boolean("Active", default=True)
 
 
 # class MlMeterType(models.Model):

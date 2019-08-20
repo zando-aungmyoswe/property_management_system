@@ -11,3 +11,5 @@ access_pms_format,pms.format,model_pms_format,base.group_user,TRUE,TRUE,TRUE,TRU
 access_pms_format_manager,pms.format,model_pms_format,base.group_erp_manager,TRUE,TRUE,TRUE,TRUE
 access_pms_format_detail,pms.format.detail,model_pms_format_detail,base.group_user,TRUE,TRUE,TRUE,TRUE
 access_pms_format_detail_manager,pms.format.detail,model_pms_format_detail,base.group_erp_manager,TRUE,TRUE,TRUE,TRUE
+access_pms_leaseterms,pms.leaseterms,model_pms_leaseterms,base.group_user,TRUE,TRUE,TRUE,TRUE
+access_pms_leaseterms_manager,pms.leaseterms,model_pms_leaseterms,base.group_erp_manager,TRUE,TRUE,TRUE,TRUE

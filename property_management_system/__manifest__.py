@@ -14,7 +14,7 @@
     'base',
     'version':
     '12.1.0.1',
-    'depends': ['base', 'sales_team', 'uom', 'web'],
+    'depends': ['base', 'uom', 'web'],
     'data': [
         'views/pms_property_type_view.xml',
         'views/pms_properties_view.xml',
@@ -22,6 +22,7 @@
         'security/ir.model.access.csv',
         'views/pms_rule_configuration_view.xml',
         'views/pms_format_view.xml',
+        'views/pms_leaseterms_view.xml',
     ],
     'installable':
     True,

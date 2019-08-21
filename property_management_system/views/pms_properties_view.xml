@@ -55,8 +55,8 @@
                     </div>
                   </group>
                   <group>
-                    <field name ="office_phone"/>
-                  </group>
+                    <!-- <field name ="office_phone"/>-->
+                  </group> 
                 </group>
               </page>
                <page name="Contact" string="Contact">

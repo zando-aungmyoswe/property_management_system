@@ -12,11 +12,10 @@
               </button>
             </div>
             <div class="oe_title">
-              <label for="name" class="oe_edit_only" string="Property Name"/>
+              <label for="name" class="oe_edit_only" string="Leaseterm Name"/>
               <h1>
                   <field name="name" placeholder="Name..."/>
               </h1>
-              <div name="options_active"/>
             </div>
             <group>
               <group>
@@ -58,7 +57,7 @@
       </field>
     </record>
      <record id="action_leaseterms_all" model="ir.actions.act_window">
-       <field name="name">leaseterms</field>
+       <field name="name">Lease Terms</field>
        <field name="res_model">pms.leaseterms</field>
        <field name="view_type">form</field>
        <field name="view_mode">tree,form</field>

@@ -15,32 +15,27 @@
                 <!-- <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/> -->
             </button>
           </div>
-            <div id="o_employee_container"><div id="o_employee_main">
-            <field name="image" widget="image" class="oe_avatar" options="{&quot;preview_image&quot;: &quot;image_medium&quot;}"/>
-            <div class="oe_title">
-              <label for="name" string="Format Name"/>
-              <h1>
-                  <field name="name" placeholder="Name..."/>
-              </h1>
-            </div>
-            <field name="code"/>
+          <field name="image" widget="image" class="oe_avatar" options="{&quot;preview_image&quot;: &quot;image_medium&quot;}"/>
+          <div class="oe_title">
+            <label for="name" string="Format Name"/>
+            <h1>
+                <field name="name" placeholder="Name..."/>
+            </h1>
+              <field name="code" class="oe_edit_only" placeholder="Code....."/>
+          </div>
             <group>
               <group>
-                <!-- <field name="name"/>
-                <field name="code"/> -->
-                <field name="gross_floor_area" placeholder="Gross Floor Area"/>
-                <field name="auto_generate_posid"/>
-                <!-- <field name="next_pos_id"/>
-                <field name="pos_id_format"/> -->
                 <field name="property_type"/>
+                <field name="gross_floor_area" placeholder="Gross Floor Area"/>
+                <field name="project_start_date"/>
+                <field name="actual_opening_date"/>
+              </group>
+              <group>
                 <field name="uom"/>
                 <field name="net_lett_able_area" placeholder="Net-Lett-able Area"/>
-                <field name="web_site_url" widget="url" placeholder="http://www.google.com"/>
-                <field name="project_start_date"/>
                 <field name="target_open_date"/>
-                <field name="actual_opening_date"/>
-                </group>
-              <group>
+                <field name="web_site_url" widget="url" placeholder="http://www.google.com"/>
+                <field name="auto_generate_posid"/>
               </group>
             </group>
             <notebook>
@@ -145,8 +140,6 @@
               </field>
               </page>
             </notebook>
-          </div>
-          </div>
           </sheet>
         </form>
       </field>

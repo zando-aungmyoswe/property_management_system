@@ -41,12 +41,20 @@ class PMSProperties(models.Model):
 
     name = fields.Char("Name", required=True, size=250)
     code = fields.Char("Code", required=True)
-    property_type = fields.Many2one("pms.property.type", "Type", required=True)
-    uom = fields.Many2one("uom.uom", "UOM", required=True)
-    gross_floor_area = fields.Integer('GFA')
-    net_lett_able_area = fields.Integer('NLA')
-    web_site_url = fields.Char("Website", size=250)
-    auto_generate_posid = fields.Boolean("Auto Generate Pos ID")
+    property_type = fields.Many2one(
+        "pms.property.type",
+        "Type",
+        required=True,
+        help="The properties's type is set the specific type.")
+    uom = fields.Many2one("uom.uom",
+                          "UOM",
+                          required=True,
+                          help="Unit Of Measure is need to set for Area.")
+    gross_floor_area = fields.Integer('GFA', help="Gross Floor Area")
+    net_lett_able_area = fields.Integer('NLA', help="Net Lett-able Area")
+    web_site_url = fields.Char("Website", size=250, help="Website URL")
+    auto_generate_posid = fields.Boolean("Auto Generate Pos ID",
+                                         help="Auto Generating POS ID?")
     next_pos_id = fields.Char("Next Pos ID")
     pos_id_format = fields.Char("POS ID Format", size=250)
     office_phone = fields.Char("Office Phone", size=250)
@@ -88,6 +96,18 @@ class PMSProperties(models.Model):
     image_small = fields.Binary("Small-sized image", attachment=True, help="Small-sized image of this contact. It is automatically "\
         "resized as a 64x64px image, with aspect ratio preserved. "\
         "Use this field anywhere a small image is required.")
+
+    street = fields.Char()
+    street2 = fields.Char()
+    zip = fields.Char(change_default=True)
+    city = fields.Char()
+    state_id = fields.Many2one("res.country.state",
+                               string='State',
+                               ondelete='restrict',
+                               domain="[('country_id', '=?', country_id)]")
+    country_id = fields.Many2one('res.country',
+                                 string='Country',
+                                 ondelete='restrict')
 
     @api.multi
     def name_get(self):

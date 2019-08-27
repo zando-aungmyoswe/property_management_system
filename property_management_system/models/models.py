@@ -39,6 +39,23 @@ class PMSPropertyType(models.Model):
 class PMSProperties(models.Model):
     _name = 'pms.properties'
 
+    l = 80
+
+    @api.multi
+    def get_limit(self):
+        self.limit = 2
+        l = 2
+
+    @api.model
+    def company_groups(self, present_ids, domain, **kwargs):
+        companies = self.env['res.company'].search([]).name_get()
+        return companies, None
+
+    _group_by_full = {
+        'company_id': company_groups,
+    }
+
+    company_id = fields.Many2many('res.company')
     name = fields.Char("Name", required=True, size=250)
     code = fields.Char("Code", required=True)
     property_type = fields.Many2one(
@@ -63,11 +80,17 @@ class PMSProperties(models.Model):
     actual_opening_date = fields.Date("Actual Openiing Date")
     bank_info = fields.Many2one('res.bank', "Bank Information")
     # bank_account = fields.Char("Bank Account")
-    property_contract_address_id = fields.Many2many('res.partner',
-                                                    'pms_contract_address',
-                                                    string='Contacts',
-                                                    domain=[('active', '=',
-                                                             True)])
+    property_contact_address_id = fields.Many2many('res.partner',
+                                                   'pms_contact_address',
+                                                   'property_id',
+                                                   'partner_id',
+                                                   string='Contacts',
+                                                   domain=[('active', '=',
+                                                            True)])
+    property_address_id = fields.Many2many('res.partner',
+                                           'pms_address',
+                                           string='Contacts',
+                                           store=False)
     management_company = fields.Many2one("res.company", "Company")
     leaseterms_line_id = fields.Many2many("pms.leaseterms",
                                           "pms_properties_leaseterms_rel",
@@ -108,6 +131,22 @@ class PMSProperties(models.Model):
     country_id = fields.Many2one('res.country',
                                  string='Country',
                                  ondelete='restrict')
+    limit = fields.Integer(compute=get_limit)
+    rows = fields.Integer(string="Rows", default=80)
+    # position_type = fields.Selection([('ceo', 'CEO'), ('manager', "Manager"),
+    #                                   ('superviser', "Superviser")],
+    #                                  string="Position")
+
+    @api.multi
+    def action_contact_filter(self):
+        print("position", self.position_type)
+        if self.position_type == 'manager':
+            self.property_address_id = None
+            contact = self.mapped('property_contact_address_id')
+            for loop in contact:
+                if loop.id == 10:
+                    self.property_address_id = loop
+            return self.property_address_id
 
     @api.multi
     def name_get(self):
@@ -127,8 +166,16 @@ class PMSProperties(models.Model):
     @api.multi
     def write(self, vals):
         tools.image_resize_images(vals, sizes={'image': (1024, None)})
+        print("Hello!", vals)
         return super(PMSProperties, self).write(vals)
 
+
+# class PMSContactAddress(models.Model):
+#     _name = "pms.contact.address"
+
+#     property_id = fields.Many2one('pms.properties', "Properties")
+#     partner_id = fields.Many2one('res.partner', "Partner")
+#     name = fields.Char("Name", default="New")
 
 # class Users(models.Model):
 #     _inherit = "res.users"
@@ -167,7 +214,7 @@ class PMSFloor(models.Model):
     name = fields.Char("Description", required=True)
     code = fields.Char("Floor Code")
     floor_code_ref = fields.Char("Floor Ref Code")
-    active = fields.Boolean("Active")
+    active = fields.Boolean("Active", default=True)
 
     @api.multi
     def name_get(self):
@@ -176,6 +223,13 @@ class PMSFloor(models.Model):
             code = record.code
             result.append((record.id, code))
         return result
+
+    @api.multi
+    def toggle_active(self):
+        for pt in self:
+            if not pt.active:
+                pt.active = self.active
+        super(PMSFloor, self).toggle_active()
 
 
 class PMSLeaseTerms(models.Model):
@@ -189,91 +243,131 @@ class PMSLeaseTerms(models.Model):
     active = fields.Boolean("Active", default=True)
 
 
-# class MlMeterType(models.Model):
-#     _name = "ml.meter.type"
+class PMSMeterType(models.Model):
+    _name = "pms.meter.type"
 
-#     name = fields.Char("Meter Type")
-#     i_lmr_date = fields.Date("Installed Date")
-#     s_lmr_value = fields.Integer("Start Reading Value")
-#     e_lmr_value = fields.Integer("End Reading Value")
-#     uom_id = fields.Many2one("uom.uom", 'UOM')
-#     digit = fields.Selection([('3', '3'), ('4', '4'), ('5', '5'), ('6', '6'),
-#                               ('7', '7'), ('8', '8'), ('9', '9')],
-#                              "Display Digits")
-#     end_date = fields.Date("Inactive On")
-#     status = fields.Boolean("Status")
-#     utility = fields.Many2one("ml.space.utility", "Utility")
-#     display_type = fields.Many2one('ml.display.type', 'Display Type')
-#     charge_type = fields.Selection([('fixed', 'Fixed'),
-#                                     ('variable', 'Variable')],
-#                                    string="Charge Type")
+    name = fields.Char("Meter No")
+    utility_id = fields.Many2one("pms.utility.type", "Utility Type")
+    display_type = fields.Many2one('pms.display.type', 'Display Type')
+    digit = fields.Selection([('3', '3'), ('4', '4'), ('5', '5'), ('6', '6'),
+                              ('7', '7'), ('8', '8'), ('9', '9')],
+                             "Display Digits")
+    charge_type = fields.Selection([('fixed', 'Fixed'),
+                                    ('variable', 'Variable')],
+                                   string="Charge Type")
 
-# class UtilityType(models.Model):
-#     _name = "utility.type"
 
-#     name = fields.Char("Utility Name")
-#     code = fields.Char("Utility Type")
+class PMSUtilityType(models.Model):
+    _name = "pms.utility.type"
 
-#     @api.multi
-#     def name_get(self):
-#         result = []
-#         for record in self:
-#             code = record.code
-#             result.append((record.id, code))
-#         return result
+    name = fields.Char("Utility Name")
+    code = fields.Char("Utility Code")
+    parent_id = fields.Many2one("pms.utility.type", "Parent")
+    active = fields.Boolean(default=True)
 
-# class MeterNumber(models.Model):
-#     _name = 'meter.number'
+    @api.multi
+    def name_get(self):
+        result = []
+        for record in self:
+            code = record.code
+            result.append((record.id, code))
+        return result
 
-#     name = fields.Char("Name")
-#     number = fields.Integer('Number')
-
-#     @api.multi
-#     def name_get(self):
-#         result = []
-#         for record in self:
-#             number = record.number
-#             result.append((record.id, number))
-#         return result
+    @api.multi
+    def toggle_active(self):
+        for pt in self:
+            if not pt.active:
+                pt.active = self.active
+        super(PMSPropertyType, self).toggle_active()
 
 
 class PMSSpaceUtility(models.Model):
-    _name = 'pms.space.utility'
+    _name = 'pms.facilities'
 
-    name = fields.Char("New")
-    # utility_type = fields.Many2one('utility.type', "Utility Type")
-    # utility_code = fields.Char("Code", related="utility_type.code", store=True)
-    # meter_no = fields.Many2one("meter.number")
+    name = fields.Char("Description", default="New")
+    utility_type_id = fields.Many2one('pms.utility.type',
+                                      "Utility Type",
+                                      required=True)
+    meter_no = fields.Many2one("pms.meter.type", "Meter No", required=True)
+    space_unit_id = fields.Many2one("pms.space.unit", string="Space Unit")
+    display_type = fields.Many2one("pms.display.type", string="Display Type")
+    supplier_type_id = fields.Many2one('pms.utility.type',
+                                       "Supplier Type",
+                                       required=True)
     start_date = fields.Date("Start Date")
-    utt_idd = fields.Boolean("IDD")
-    utt_local = fields.Boolean("LOCAL")
-    utt_mobile = fields.Boolean("MOBILE")
-    utt_std = fields.Boolean("STD")
-    utt_gen = fields.Boolean("GEN")
-    utt_sub = fields.Boolean("SUB")
     interface_type = fields.Selection([('auto', 'Auto'), ('manual', 'Manual'),
                                        ('mobile', 'Mobile')], "Interface Type")
     remark = fields.Text("Remark")
-    # meter_type_id = fields.One2many("ml.meter.type", 'utility', "Meter Type")
-    unit_id = fields.Many2one("pms.space", string='Space Unit')
+    install_date = fields.Date("Install Date")
+    start_reading_value = fields.Integer("Start Reading Value")
+    end_reading_value = fields.Integer("End Reading Value")
+    digit = fields.Integer("Digit")
+    end_date = fields.Date("End Date")
+    status = fields.Boolean("Status", default=True)
 
 
-class PMSSpace(models.Model):
-    _name = 'pms.space'
+class PMSSpaceUntiManagement(models.Model):
+    _name = 'pms.space.unit.management'
+
+    name = fields.Char("Name", default="New", readonly=True)
+    floor_id = fields.Many2one("pms.floor", "Floor")
+    space_unit_id = fields.Many2one("pms.space.unit", "From Unit")
+    area = fields.Integer("Area")
+    no_of_unit = fields.Integer("No of Unit")
+    to_unit = fields.Char("To Unit")
+    combination_type = fields.Selection(
+        [('random', 'Random'), ('range', 'Range')],
+        "Combination Type",
+    )
+    action_type = fields.Selection([('division', 'Division'),
+                                    ('combination', 'Combination')],
+                                   "Action Type",
+                                   default="division")
+    state = fields.Selection([('draft', "Draft"), ('done', "Done")],
+                             "Status",
+                             default="draft")
+    space_unit = fields.Many2many("pms.space.unit", string="Unit")
+
+    @api.multi
+    def action_division(self):
+        if self.state == 'draft':
+            self.state = "done"
+
+    @api.multi
+    def action_combination(self):
+        if self.state == 'draft':
+            self.state = "done"
+
+
+class PMSSpaceType(models.Model):
+    _name = 'pms.space.type'
+
+    name = fields.Char("Name")
+    chargeable = fields.Boolean("Chargeable")
+    divisible = fields.Boolean("Divisible")
+
+
+class PMSSpaceUnit(models.Model):
+    _name = 'pms.space.unit'
 
     name = fields.Char("Name", default="New", readonly=True)
     property_id = fields.Many2one("pms.properties",
                                   string="Property",
                                   required=True)
     floor_id = fields.Many2one("pms.floor", string="Floor")
-    unit_no = fields.Char("Space Unit No", required=True)
+    parent_id = fields.Many2one("pms.space.unit", "Parent", store=True)
+    unittype_id = fields.Many2one("pms.space.type", "Space Type")
+    uom = fields.Many2one("uom.uom", "UOM")
+    management_id = fields.Many2one("pms.space.unit.management",
+                                    "Space Management")
+    unit_no = fields.Char("Unit Code", required=True)
     area = fields.Integer("Space Area")
     start_date = fields.Date("Start Date")
     end_date = fields.Date("End Date")
-    uom = fields.Many2one("uom.uom", "UOM")
-    remark = fields.Text("Remark")
-    status = fields.Boolean("Status", default=True)
-    utility_id = fields.One2many("pms.space.utility", "unit_id", "Facility")
+    status = fields.Selection([('vacant', 'Vacant'), ('occupied', 'Occupied')],
+                              string="Status",
+                              default="vacant")
+    # utility_id = fields.One2many("pms.space.utility", "unit_id", "Facility")
 
     @api.multi
     def name_get(self):
@@ -286,24 +380,27 @@ class PMSSpace(models.Model):
     @api.model
     def create(self, values):
         if values.get('name', 'New') == 'New':
-            values['name'] = 'Mall(' + self.env['ml.mall'].browse(
-                values['mall']).code + ')/Unit(' + values['unit_no'] + ')'
-        return super(PMSSpace, self).create(values)
+            values['name'] = 'PMS(' + self.env['pms.properties'].browse(
+                values['property_id']
+            ).code + ')/Unit(' + values['unit_no'] + ')'
+        return super(PMSSpaceUnit, self).create(values)
 
 
-# class MlDisplayType(models.Model):
-#     _name = "ml.display.type"
+class PMSDisplayType(models.Model):
+    _name = "pms.display.type"
 
-#     name = fields.Char("Display Name")
-#     code = fields.Char("Display Code")
+    name = fields.Char("Display Name")
+    code = fields.Char("Display Code")
+    active = fields.Boolean(default=True)
 
-#     @api.multi
-#     def name_get(self):
-#         result = []
-#         for record in self:
-#             code = record.code
-#             result.append((record.id, code))
-#         return result
+    @api.multi
+    def name_get(self):
+        result = []
+        for record in self:
+            code = record.code
+            result.append((record.id, code))
+        return result
+
 
 # class ResStateCity(models.Model):
 #     _name = 'res.state.city'

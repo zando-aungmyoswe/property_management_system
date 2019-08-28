@@ -31,7 +31,6 @@
                 <field name="gross_floor_area" placeholder="Gross Floor Area"/>
                 <field name="project_start_date"/>
                 <field name="actual_opening_date"/>
-                <!-- <field name="company_id"/> -->
               </group>
               <group>
                 <field name="uom"/>
@@ -45,11 +44,11 @@
               <page name="Property" string="Property Address">
                 <group>
                   <group> 
-                   <label for="street" string="Address"/>
+                    <label for="street" string="Address"/>
                     <div class="o_address_format">
-                        <field name="street" placeholder="Street..." class="o_address_street"/>
+                        <field name="street" placeholder="No..." class="o_address_street"/>
                         <field name="street2" placeholder="Street 2..." class="o_address_street"/>
-                        <field name="city" placeholder="City" class="o_address_city"/>
+                        <field name="city_id" placeholder="City" class="o_address_city"/>
                         <field name="state_id" class="o_address_state" placeholder="State" options='{"no_open": True}'/>
                         <field name="zip" placeholder="ZIP" class="o_address_zip"/>
                         <field name="country_id" placeholder="Country" class="o_address_country" options='{"no_open": True, "no_create": True}'/>
@@ -61,19 +60,8 @@
                 </group>
               </page>
                <page name="Contact" string="Contact">
-                  <group class="oe_subtotal_footer oe_right" colspan="2">
-                        <field name="rows" invisible="1"/>
-                        <input type="text" name="temp_row" class="temp_row" placeholder="Number of rows" style="height:40px;"/> 
-                        <button string="submit" class="filter_search" custom="click" style="height:40px;background: rgb(254,204,177);background: linear-gradient(135deg, rgba(254,204,177,1) 0%,rgba(241,116,50,1) 50%,rgba(234,85,7,1) 51%,rgba(251,149,94,1) 100%);ilter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#feccb1', endColorstr='#fb955e',GradientType=1 );margin-left:5px;"/>  
-                  </group>
-                  <field name="property_contact_address_id">
-                    <tree editable="bottom">
-                    <field name="name"/>
-                    <field name="email"/>
-                    <field name="function"/>
-                    <field name="phone"/>
-                   
-                    <!-- <kanban default_group_by="is_company">
+                  <field name="property_contact_address_id" widget="kanvan">                   
+                     <kanban default_group_by="is_company">
                       <field name="id"/>
                       <field name="color"/>
                       <field name="name"/>
@@ -93,7 +81,7 @@
                       <field name="state_id"/>
                       <field name="image_small"/>
                       <field name="lang"/>
-                       fields in form x2many view to diminish requests 
+                       <!-- fields in form x2many view to diminish requests  -->
                       <field name="comment"/>
                       <field name="customer"/>
                       <field name="display_name"/>
@@ -130,9 +118,8 @@
                                   </div>
                               </div>
                           </t>
-                      </templates>
-                    </kanban> -->
-                    </tree>
+                        </templates>
+                      </kanban> 
                   </field>
                </page>
               <page name="Management" string="Management">
@@ -242,11 +229,11 @@
       parent="pms_menu_config"
       action="sales_team.sales_team_config_action"
       sequence="2"/> -->
-    <menuitem id="uom_menu" 
+    <!-- <menuitem id="uom_menu" 
       name="Units of Measure" 
       parent="pms_menu_config"
       action="uom.product_uom_form_action"
-      sequence="3"/>
+      sequence="3"/> -->
      <!-- <menuitem id="currency_menu" 
       name="Currency" 
       parent="pms_menu_config"

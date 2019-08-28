@@ -1,4 +1,3 @@
-#-*- coding: utf-8 -*-
 from odoo import models, fields, api, tools
 import base64
 import pytz
@@ -12,28 +11,6 @@ _tzs = [
 
 def _tz_get(self):
     return _tzs
-
-
-class PMSPropertyType(models.Model):
-    _name = 'pms.property.type'
-
-    name = fields.Char("Property Type", required=True)
-    active = fields.Boolean(default=True)
-
-    @api.multi
-    def name_get(self):
-        result = []
-        for record in self:
-            code = record.name
-            result.append((record.id, code))
-        return result
-
-    @api.multi
-    def toggle_active(self):
-        for pt in self:
-            if not pt.active:
-                pt.active = self.active
-        super(PMSPropertyType, self).toggle_active()
 
 
 class PMSProperties(models.Model):
@@ -63,7 +40,7 @@ class PMSProperties(models.Model):
         "Type",
         required=True,
         help="The properties's type is set the specific type.")
-    uom = fields.Many2one("uom.uom",
+    uom = fields.Many2one("pms.uom",
                           "UOM",
                           required=True,
                           help="Unit Of Measure is need to set for Area.")
@@ -78,7 +55,7 @@ class PMSProperties(models.Model):
     project_start_date = fields.Date("Project Start Date")
     target_open_date = fields.Date("Target Opening Date")
     actual_opening_date = fields.Date("Actual Openiing Date")
-    bank_info = fields.Many2one('res.bank', "Bank Information")
+    bank_info = fields.Many2one('pms.bank', "Bank Information")
     # bank_account = fields.Char("Bank Account")
     property_contact_address_id = fields.Many2many('res.partner',
                                                    'pms_contact_address',
@@ -97,7 +74,7 @@ class PMSProperties(models.Model):
                                           "properties_id",
                                           "leaseterm_id",
                                           string="Add LeaseTerms")
-    currency_id = fields.Many2one("res.currency", "Currency")
+    currency_id = fields.Many2one("pms.currency", "Currency")
     timezone = fields.Selection(
         _tz_get,
         string='Timezone',
@@ -123,12 +100,15 @@ class PMSProperties(models.Model):
     street = fields.Char()
     street2 = fields.Char()
     zip = fields.Char(change_default=True)
-    city = fields.Char()
-    state_id = fields.Many2one("res.country.state",
+    city_id = fields.Many2one("pms.city",
+                              string='State',
+                              ondelete='restrict',
+                              domain="[('state_id', '=?', state_id)]")
+    state_id = fields.Many2one("pms.state",
                                string='State',
                                ondelete='restrict',
                                domain="[('country_id', '=?', country_id)]")
-    country_id = fields.Many2one('res.country',
+    country_id = fields.Many2one('pms.country',
                                  string='Country',
                                  ondelete='restrict')
     limit = fields.Integer(compute=get_limit)
@@ -243,110 +223,6 @@ class PMSLeaseTerms(models.Model):
     active = fields.Boolean("Active", default=True)
 
 
-class PMSMeterType(models.Model):
-    _name = "pms.meter.type"
-
-    name = fields.Char("Meter No")
-    utility_id = fields.Many2one("pms.utility.type", "Utility Type")
-    display_type = fields.Many2one('pms.display.type', 'Display Type')
-    digit = fields.Selection([('3', '3'), ('4', '4'), ('5', '5'), ('6', '6'),
-                              ('7', '7'), ('8', '8'), ('9', '9')],
-                             "Display Digits")
-    charge_type = fields.Selection([('fixed', 'Fixed'),
-                                    ('variable', 'Variable')],
-                                   string="Charge Type")
-
-
-class PMSUtilityType(models.Model):
-    _name = "pms.utility.type"
-
-    name = fields.Char("Utility Name")
-    code = fields.Char("Utility Code")
-    parent_id = fields.Many2one("pms.utility.type", "Parent")
-    active = fields.Boolean(default=True)
-
-    @api.multi
-    def name_get(self):
-        result = []
-        for record in self:
-            code = record.code
-            result.append((record.id, code))
-        return result
-
-    @api.multi
-    def toggle_active(self):
-        for pt in self:
-            if not pt.active:
-                pt.active = self.active
-        super(PMSPropertyType, self).toggle_active()
-
-
-class PMSSpaceUtility(models.Model):
-    _name = 'pms.facilities'
-
-    name = fields.Char("Description", default="New")
-    utility_type_id = fields.Many2one('pms.utility.type',
-                                      "Utility Type",
-                                      required=True)
-    meter_no = fields.Many2one("pms.meter.type", "Meter No", required=True)
-    space_unit_id = fields.Many2one("pms.space.unit", string="Space Unit")
-    display_type = fields.Many2one("pms.display.type", string="Display Type")
-    supplier_type_id = fields.Many2one('pms.utility.type',
-                                       "Supplier Type",
-                                       required=True)
-    start_date = fields.Date("Start Date")
-    interface_type = fields.Selection([('auto', 'Auto'), ('manual', 'Manual'),
-                                       ('mobile', 'Mobile')], "Interface Type")
-    remark = fields.Text("Remark")
-    install_date = fields.Date("Install Date")
-    start_reading_value = fields.Integer("Start Reading Value")
-    end_reading_value = fields.Integer("End Reading Value")
-    digit = fields.Integer("Digit")
-    end_date = fields.Date("End Date")
-    status = fields.Boolean("Status", default=True)
-
-
-class PMSSpaceUntiManagement(models.Model):
-    _name = 'pms.space.unit.management'
-
-    name = fields.Char("Name", default="New", readonly=True)
-    floor_id = fields.Many2one("pms.floor", "Floor")
-    space_unit_id = fields.Many2one("pms.space.unit", "From Unit")
-    area = fields.Integer("Area")
-    no_of_unit = fields.Integer("No of Unit")
-    to_unit = fields.Char("To Unit")
-    combination_type = fields.Selection(
-        [('random', 'Random'), ('range', 'Range')],
-        "Combination Type",
-    )
-    action_type = fields.Selection([('division', 'Division'),
-                                    ('combination', 'Combination')],
-                                   "Action Type",
-                                   default="division")
-    state = fields.Selection([('draft', "Draft"), ('done', "Done")],
-                             "Status",
-                             default="draft")
-    space_unit = fields.Many2many("pms.space.unit", string="Unit")
-
-    @api.multi
-    def action_division(self):
-        if self.state == 'draft':
-            self.state = "done"
-
-    @api.multi
-    def action_combination(self):
-        if self.state == 'draft':
-            self.state = "done"
-
-
-class PMSSpaceType(models.Model):
-    _name = 'pms.space.type'
-
-    name = fields.Char("Name")
-    chargeable = fields.Boolean("Chargeable")
-    divisible = fields.Boolean("Divisible")
-
-
 class PMSSpaceUnit(models.Model):
     _name = 'pms.space.unit'
 
@@ -357,7 +233,7 @@ class PMSSpaceUnit(models.Model):
     floor_id = fields.Many2one("pms.floor", string="Floor")
     parent_id = fields.Many2one("pms.space.unit", "Parent", store=True)
     unittype_id = fields.Many2one("pms.space.type", "Space Type")
-    uom = fields.Many2one("uom.uom", "UOM")
+    uom = fields.Many2one("pms.uom", "UOM")
     management_id = fields.Many2one("pms.space.unit.management",
                                     "Space Management")
     unit_no = fields.Char("Unit Code", required=True)
@@ -384,22 +260,6 @@ class PMSSpaceUnit(models.Model):
                 values['property_id']
             ).code + ')/Unit(' + values['unit_no'] + ')'
         return super(PMSSpaceUnit, self).create(values)
-
-
-class PMSDisplayType(models.Model):
-    _name = "pms.display.type"
-
-    name = fields.Char("Display Name")
-    code = fields.Char("Display Code")
-    active = fields.Boolean(default=True)
-
-    @api.multi
-    def name_get(self):
-        result = []
-        for record in self:
-            code = record.code
-            result.append((record.id, code))
-        return result
 
 
 # class ResStateCity(models.Model):

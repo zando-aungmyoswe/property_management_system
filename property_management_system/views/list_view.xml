@@ -1,9 +1,0 @@
-<odoo>
-    <data>
-         <template id="assets_backend_int" name="tree icon assets" inherit_id="web.assets_backend">
-            <xpath expr="." position="inside">
-                <script type="text/javascript" src="/property_management_system/static/src/js/list_view.js"></script>
-            </xpath>
-        </template>
-    </data>
-</odoo>

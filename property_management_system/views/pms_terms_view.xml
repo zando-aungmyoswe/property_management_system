@@ -73,10 +73,10 @@
       name="terms" 
       parent="pms_properties_menu_root" 
       sequence="2"/> -->
-    <menuitem  id="terms_menu_root" 
+    <!-- <menuitem  id="terms_menu_root" 
       name="Terms" 
       parent="pms_menu_config"
       action="action_terms_all"
-      sequence="2"/>
+      sequence="2"/> -->
   </data>
 </odoo>

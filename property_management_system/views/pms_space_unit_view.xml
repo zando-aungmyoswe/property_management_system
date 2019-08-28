@@ -189,7 +189,7 @@
     </record>
     <menuitem  id="space_menu_root" 
       name="Space Unit" 
-       parent="pms_properties_menu_root"
+      parent="pms_properties_menu_root"
       action="action_space_all"
       sequence="1"/>
   </data>

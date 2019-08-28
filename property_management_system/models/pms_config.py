@@ -171,25 +171,3 @@ class PMSRuleSetting(models.TransientModel):
             'res_model': 'pms.rule',
             'tag': 'reload',
         }
-
-
-class PMSTerms(models.Model):
-    _name = "pms.terms"
-
-    name = fields.Char("Name", default="New", readonly=True)
-    space_unit_fromat_id = fields.Many2one("pms.format",
-                                           string="Unit Code Format")
-    pos_id_format_id = fields.Many2one("pms.format", string="POS ID Format")
-    company_id = fields.Many2one("res.company", string="Company")
-    is_auto_generate_posid = fields.Boolean("Auto Generate POS ID")
-    property_code_len = fields.Integer("Property Code Len")
-    floor_code_len = fields.Integer("Floor Code Len")
-    space_unit_code_len = fields.Integer("Space Unit Code Len")
-    active = fields.Boolean("Active", default=True)
-
-    @api.multi
-    def toggle_active(self):
-        for pt in self:
-            if not pt.active:
-                pt.active = self.active
-        super(PMSTerms, self).toggle_active()
